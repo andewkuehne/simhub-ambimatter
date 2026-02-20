@@ -47,6 +47,17 @@ namespace SmartAmbientMatter.Settings
             TxtBridgeHost.Text = s.BridgeHost;
             TxtBridgePort.Text = s.BridgePort.ToString();
 
+            // Screen capture fields
+            TxtMonitorIndex.Text   = s.MonitorIndex.ToString();
+            TxtCapX.Text           = s.CaptureX.ToString();
+            TxtCapY.Text           = s.CaptureY.ToString();
+            TxtCapW.Text           = s.CaptureWidth.ToString();
+            TxtCapH.Text           = s.CaptureHeight.ToString();
+            SliderSampleStep.Value = s.SampleStep;
+            SliderCaptureMs.Value  = s.CaptureIntervalMs;
+            SliderBrightMin.Value  = s.BrightnessMin;
+            SliderBrightMax.Value  = s.BrightnessMax;
+
             SliderIntensity.Value    = s.IntensityThreshold;
             SliderSleep.Value        = s.MinSleepMs;
             SliderTunnelDrop.Value   = s.TunnelBrightDrop;
@@ -71,6 +82,22 @@ namespace SmartAmbientMatter.Settings
 
             if (int.TryParse(TxtBridgePort.Text, out int port) && port > 0 && port < 65536)
                 s.BridgePort = port;
+
+            // Screen capture fields
+            if (int.TryParse(TxtMonitorIndex.Text, out int monIdx) && monIdx >= 0)
+                s.MonitorIndex = monIdx;
+            if (int.TryParse(TxtCapX.Text, out int capX))
+                s.CaptureX = capX;
+            if (int.TryParse(TxtCapY.Text, out int capY))
+                s.CaptureY = capY;
+            if (int.TryParse(TxtCapW.Text, out int capW) && capW >= 0)
+                s.CaptureWidth = capW;
+            if (int.TryParse(TxtCapH.Text, out int capH) && capH >= 0)
+                s.CaptureHeight = capH;
+            s.SampleStep        = (int)SliderSampleStep.Value;
+            s.CaptureIntervalMs = (int)SliderCaptureMs.Value;
+            s.BrightnessMin     = (int)SliderBrightMin.Value;
+            s.BrightnessMax     = (int)SliderBrightMax.Value;
 
             s.IntensityThreshold = SliderIntensity.Value;
             s.MinSleepMs         = (int)SliderSleep.Value;
@@ -171,6 +198,30 @@ namespace SmartAmbientMatter.Settings
             LblTunnelFloorVal.Text = ((int)SliderTunnelFloor.Value).ToString();
         }
 
+        private void SliderSampleStep_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_loading || LblSampleStep == null) return;
+            LblSampleStep.Text = ((int)SliderSampleStep.Value).ToString();
+        }
+
+        private void SliderCaptureMs_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_loading || LblCaptureMs == null) return;
+            LblCaptureMs.Text = ((int)SliderCaptureMs.Value).ToString();
+        }
+
+        private void SliderBrightMin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_loading || LblBrightMin == null) return;
+            LblBrightMin.Text = ((int)SliderBrightMin.Value).ToString();
+        }
+
+        private void SliderBrightMax_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_loading || LblBrightMax == null) return;
+            LblBrightMax.Text = ((int)SliderBrightMax.Value).ToString();
+        }
+
         private void UpdateSliderLabels()
         {
             if (LblIntensityVal != null)
@@ -181,6 +232,14 @@ namespace SmartAmbientMatter.Settings
                 LblTunnelDropVal.Text  = ((int)SliderTunnelDrop.Value).ToString();
             if (LblTunnelFloorVal != null)
                 LblTunnelFloorVal.Text = ((int)SliderTunnelFloor.Value).ToString();
+            if (LblSampleStep != null)
+                LblSampleStep.Text     = ((int)SliderSampleStep.Value).ToString();
+            if (LblCaptureMs != null)
+                LblCaptureMs.Text      = ((int)SliderCaptureMs.Value).ToString();
+            if (LblBrightMin != null)
+                LblBrightMin.Text      = ((int)SliderBrightMin.Value).ToString();
+            if (LblBrightMax != null)
+                LblBrightMax.Text      = ((int)SliderBrightMax.Value).ToString();
         }
 
         // ── Save button ────────────────────────────────────────────────────────
@@ -204,6 +263,9 @@ namespace SmartAmbientMatter.Settings
             var computed = _plugin.LastComputed;
             LblCurrentKelvin.Text     = $"Current Kelvin:     {computed?.Kelvin ?? 0} K";
             LblCurrentBrightness.Text = $"Current Brightness: {computed?.Brightness ?? 0}";
+
+            var rgb = _plugin.ScreenCapture?.LastAvgRgb ?? (R: 0, G: 0, B: 0);
+            LblAvgRgb.Text = $"Avg Screen RGB:     R={rgb.R}  G={rgb.G}  B={rgb.B}";
 
             // Per-zone status
             var lines = new System.Text.StringBuilder();

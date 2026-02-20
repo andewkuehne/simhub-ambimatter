@@ -63,6 +63,109 @@
                          ToolTip="UDP port the Python bridge listens on (default: 10001)"/>
             </Grid>
 
+            <!-- ── SCREEN CAPTURE ─────────────────────────────────────────────── -->
+            <TextBlock Text="SCREEN CAPTURE" Style="{StaticResource SectionHeaderStyle}" Margin="0,20,0,6"/>
+            <Border BorderBrush="#FF444444" BorderThickness="0,0,0,1" Margin="0,0,0,8"/>
+
+            <TextBlock Text="Captures the game screen and derives Kelvin + Brightness from average pixel color. Weather, tunnels, and time-of-day are all handled automatically."
+                       Foreground="#FF888888" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="60"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Monitor Index -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Monitor Index (0=primary)"
+                           Style="{StaticResource LabelStyle}" Margin="0,8,8,0"/>
+                <TextBox Grid.Row="0" Grid.Column="1"
+                         x:Name="TxtMonitorIndex"
+                         Width="50" HorizontalAlignment="Left"
+                         Margin="0,8,0,0"
+                         ToolTip="0 = primary monitor, 1 = second monitor, etc."/>
+
+                <!-- Capture Region -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Capture Region"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,8,0"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                            Orientation="Horizontal" Margin="0,12,0,0">
+                    <TextBlock Text="X:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="TxtCapX" Width="55" Margin="0,0,8,0"
+                             ToolTip="Horizontal offset within monitor (pixels)"/>
+                    <TextBlock Text="Y:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="TxtCapY" Width="55" Margin="0,0,8,0"
+                             ToolTip="Vertical offset within monitor (pixels)"/>
+                    <TextBlock Text="W:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="TxtCapW" Width="55" Margin="0,0,8,0"
+                             ToolTip="Width of capture region (0 = full monitor width)"/>
+                    <TextBlock Text="H:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="TxtCapH" Width="55" Margin="0,0,8,0"
+                             ToolTip="Height of capture region (0 = full monitor height)"/>
+                    <TextBlock Text="(0,0,0,0 = full monitor)"
+                               Foreground="#FF888888" FontSize="10" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Sample Step -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Sample Step"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,8,0"
+                           ToolTip="Sample every Nth pixel. Higher = faster but less accurate."/>
+                <Slider Grid.Row="2" Grid.Column="1"
+                        x:Name="SliderSampleStep"
+                        Minimum="5" Maximum="50" SmallChange="5"
+                        TickFrequency="5" IsSnapToTickEnabled="True"
+                        ValueChanged="SliderSampleStep_ValueChanged" Margin="0,14,8,0"/>
+                <TextBlock Grid.Row="2" Grid.Column="2"
+                           x:Name="LblSampleStep" VerticalAlignment="Center"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
+
+                <!-- Capture Interval -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Capture Interval (ms)"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,8,0"
+                           ToolTip="How often to grab the screen. 100ms = 10 Hz."/>
+                <Slider Grid.Row="3" Grid.Column="1"
+                        x:Name="SliderCaptureMs"
+                        Minimum="50" Maximum="500" SmallChange="50"
+                        TickFrequency="50" IsSnapToTickEnabled="True"
+                        ValueChanged="SliderCaptureMs_ValueChanged" Margin="0,14,8,0"/>
+                <TextBlock Grid.Row="3" Grid.Column="2"
+                           x:Name="LblCaptureMs" VerticalAlignment="Center"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
+
+                <!-- Brightness Floor -->
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Brightness Floor"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,8,0"
+                           ToolTip="Minimum bulb brightness. Prevents total darkness when screen is black."/>
+                <Slider Grid.Row="4" Grid.Column="1"
+                        x:Name="SliderBrightMin"
+                        Minimum="0" Maximum="50" SmallChange="1"
+                        ValueChanged="SliderBrightMin_ValueChanged" Margin="0,14,8,0"/>
+                <TextBlock Grid.Row="4" Grid.Column="2"
+                           x:Name="LblBrightMin" VerticalAlignment="Center"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
+
+                <!-- Brightness Ceiling -->
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Brightness Ceiling"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,8,0"
+                           ToolTip="Maximum bulb brightness for full-white screens."/>
+                <Slider Grid.Row="5" Grid.Column="1"
+                        x:Name="SliderBrightMax"
+                        Minimum="100" Maximum="254" SmallChange="1"
+                        ValueChanged="SliderBrightMax_ValueChanged" Margin="0,14,8,0"/>
+                <TextBlock Grid.Row="5" Grid.Column="2"
+                           x:Name="LblBrightMax" VerticalAlignment="Center"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
+            </Grid>
+
             <!-- ── ZONES ─────────────────────────────────────────────────────── -->
             <TextBlock Text="ZONES" Style="{StaticResource SectionHeaderStyle}" Margin="0,20,0,6"/>
             <Border BorderBrush="#FF444444" BorderThickness="0,0,0,1" Margin="0,0,0,8"/>
@@ -183,7 +286,7 @@
                 <!-- Tunnel Bright Drop -->
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Tunnel Brightness Drop"
                            Style="{StaticResource LabelStyle}" Margin="0,12,8,0"
-                           ToolTip="Brightness drop per frame that triggers Guillotine check. Lower = more sensitive."/>
+                           ToolTip="Screen brightness drop (per capture) that triggers Guillotine. Lower = more sensitive to sudden darkness."/>
                 <Slider Grid.Row="2" Grid.Column="1"
                         x:Name="SliderTunnelDrop"
                         Minimum="10" Maximum="100" SmallChange="5"
@@ -217,6 +320,8 @@
                 <TextBlock x:Name="LblCurrentKelvin" Style="{StaticResource StatusLabelStyle}"
                            Margin="6,2"/>
                 <TextBlock x:Name="LblCurrentBrightness" Style="{StaticResource StatusLabelStyle}"
+                           Margin="6,2"/>
+                <TextBlock x:Name="LblAvgRgb" Style="{StaticResource StatusLabelStyle}"
                            Margin="6,2"/>
                 <TextBlock x:Name="LblZoneStatus" Style="{StaticResource StatusLabelStyle}"
                            Margin="6,2,6,6" TextWrapping="Wrap"/>

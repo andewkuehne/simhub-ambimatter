@@ -9,10 +9,10 @@ namespace SmartAmbientMatter
 {
     /// <summary>
     /// Main SimHub plugin class for AmbiMatter.
-    /// Reads iRacing telemetry, runs the three-layer atmospheric model,
+    /// Captures the game screen, derives Kelvin + Brightness from the average pixel color,
     /// and sends zone-aware UDP commands to the Python Matter bridge.
     /// </summary>
-    [PluginDescription("Atmospheric ambient lighting for Matter smart bulbs")]
+    [PluginDescription("Screen capture ambient lighting for Matter smart bulbs")]
     [PluginAuthor("Andrew Kuehne")]
     [PluginName("AmbiMatter")]
     public class AmbiMatterPlugin : IPlugin, IDataPlugin, IWPFSettingsV2
@@ -22,7 +22,7 @@ namespace SmartAmbientMatter
         public PluginManager PluginManager { get; set; }
 
         // ── Core components ────────────────────────────────────────────────────
-        private readonly AtmosphereEngine    _atmosphereEngine    = new AtmosphereEngine();
+        private ScreenCaptureEngine   _screenCapture;
         private readonly ZoneManager         _zoneManager         = new ZoneManager();
         private readonly TransitionCalculator _transitionCalc      = new TransitionCalculator();
         private UdpSender _udpSender;
@@ -49,6 +49,7 @@ namespace SmartAmbientMatter
                 "GeneralSettings",
                 () => new AmbiMatterSettings());
 
+            _screenCapture = new ScreenCaptureEngine(Settings);
             _zoneManager.Initialize(Settings.Zones);
             _udpSender = new UdpSender();
 
@@ -56,6 +57,9 @@ namespace SmartAmbientMatter
             this.AttachDelegate("AmbiMatter.CurrentKelvin",    () => _lastComputed?.Kelvin ?? 0);
             this.AttachDelegate("AmbiMatter.CurrentBrightness", () => _lastComputed?.Brightness ?? 0);
             this.AttachDelegate("AmbiMatter.GameRunning",       () => _gameRunning);
+            this.AttachDelegate("AmbiMatter.AvgR",              () => _screenCapture?.LastAvgRgb.R ?? 0);
+            this.AttachDelegate("AmbiMatter.AvgG",              () => _screenCapture?.LastAvgRgb.G ?? 0);
+            this.AttachDelegate("AmbiMatter.AvgB",              () => _screenCapture?.LastAvgRgb.B ?? 0);
 
             SimHub.Logging.Current.Info(
                 $"AmbiMatter: Ready — {Settings.Zones.Count} zone(s), " +
@@ -69,9 +73,8 @@ namespace SmartAmbientMatter
             if (!data.GameRunning)
                 return;
 
-            // ── Layer 1+2: Atmospheric calculation ────────────────────────────
-            double timeSec = GetSessionTimeOfDaySec(pluginManager);
-            LightingState computed = _atmosphereEngine.Calculate(timeSec);
+            // ── Screen capture → LightingState ────────────────────────────────
+            LightingState computed = _screenCapture.Capture();
 
             // ── Layer 3a: Guillotine check ─────────────────────────────────────
             // _prevComputedBrightness == -1 on first frame; treat as no guillotine
@@ -133,6 +136,7 @@ namespace SmartAmbientMatter
         {
             SimHub.Logging.Current.Info("AmbiMatter: Shutting down");
             this.SaveCommonSettings("GeneralSettings", Settings);
+            _screenCapture?.Dispose();
             _udpSender?.Dispose();
         }
 
@@ -147,47 +151,31 @@ namespace SmartAmbientMatter
 
         public string LeftMenuTitle => "AmbiMatter";
 
-        // ── Internal helpers ───────────────────────────────────────────────────
+        // ── Settings helpers ───────────────────────────────────────────────────
 
-        /// <summary>
-        /// Reads iRacing's SessionTimeOfDay (seconds from midnight).
-        /// Falls back to noon (43200s) if the property is unavailable.
-        /// Never throws — missing telemetry should never crash the plugin.
-        /// </summary>
-        private double GetSessionTimeOfDaySec(PluginManager pluginManager)
-        {
-            try
-            {
-                var raw = pluginManager.GetPropertyValue(
-                    "DataCorePlugin.GameRawData.SessionTimeOfDay");
-                if (raw != null)
-                    return Convert.ToDouble(raw);
-            }
-            catch (Exception ex)
-            {
-                SimHub.Logging.Current.Debug(
-                    $"AmbiMatter: SessionTimeOfDay unavailable ({ex.Message}), using noon");
-            }
-            return 43200.0;  // fallback: noon
-        }
-
-        /// <summary>Saves settings and re-initializes zone manager. Called by settings UI.</summary>
+        /// <summary>Saves settings, re-initializes zone manager, and updates capture engine. Called by settings UI.</summary>
         public void SaveSettings()
         {
             this.SaveCommonSettings("GeneralSettings", Settings);
             _zoneManager.Initialize(Settings.Zones);
+            _screenCapture.UpdateSettings(Settings);
             SimHub.Logging.Current.Info(
                 $"AmbiMatter: Settings saved, {Settings.Zones.Count} zone(s) reloaded");
         }
 
+        // ── Exposed to settings UI ─────────────────────────────────────────────
+
         /// <summary>Exposes ZoneManager for settings UI status panel.</summary>
         public ZoneManager ZoneManager => _zoneManager;
 
-        /// <summary>Last computed atmospheric state. Read by settings UI status panel.</summary>
+        /// <summary>Last computed state from screen capture. Read by settings UI status panel.</summary>
         public LightingState LastComputed => _lastComputed;
 
         /// <summary>Whether the game was running on the last DataUpdate. Read by settings UI.</summary>
         public bool GameRunning => _gameRunning;
+
+        /// <summary>Exposes ScreenCaptureEngine for settings UI RGB readout.</summary>
+        public ScreenCaptureEngine ScreenCapture => _screenCapture;
 
         private static int Clamp(int value, int min, int max) =>
             value < min ? min : value > max ? max : value;

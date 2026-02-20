@@ -16,6 +16,35 @@ namespace SmartAmbientMatter
         /// <summary>UDP port the Python bridge listens on.</summary>
         public int BridgePort { get; set; } = 10001;
 
+        // ── Screen Capture ─────────────────────────────────────────────────────
+
+        /// <summary>Monitor to capture from. 0 = primary monitor.</summary>
+        public int MonitorIndex      { get; set; } = 0;
+
+        /// <summary>Capture region X offset within the selected monitor. 0 = monitor left edge.</summary>
+        public int CaptureX          { get; set; } = 0;
+
+        /// <summary>Capture region Y offset within the selected monitor. 0 = monitor top edge.</summary>
+        public int CaptureY          { get; set; } = 0;
+
+        /// <summary>Capture region width in pixels. 0 = full monitor width.</summary>
+        public int CaptureWidth      { get; set; } = 0;
+
+        /// <summary>Capture region height in pixels. 0 = full monitor height.</summary>
+        public int CaptureHeight     { get; set; } = 0;
+
+        /// <summary>Sample every Nth pixel (higher = faster, less accurate).</summary>
+        public int SampleStep        { get; set; } = 20;
+
+        /// <summary>Minimum milliseconds between screen captures (100 = 10 Hz).</summary>
+        public int CaptureIntervalMs { get; set; } = 100;
+
+        /// <summary>Minimum bulb brightness (0-254). Prevents the room going fully dark.</summary>
+        public int BrightnessMin     { get; set; } = 10;
+
+        /// <summary>Maximum bulb brightness (0-254). Ceiling for full-white screens.</summary>
+        public int BrightnessMax     { get; set; } = 254;
+
         // ── Rate Limiting ───────────────────────────────────────────────────────
         /// <summary>
         /// Minimum milliseconds between commands per zone (the "Matter Wall").

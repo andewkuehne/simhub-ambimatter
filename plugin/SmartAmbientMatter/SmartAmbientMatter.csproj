@@ -7,6 +7,7 @@
     <RootNamespace>SmartAmbientMatter</RootNamespace>
     <Nullable>disable</Nullable>
     <LangVersion>9.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!--
       SimHubPath is resolved differently depending on where the build runs:
@@ -49,6 +50,9 @@
       <HintPath>$(SimHubPath)/log4net.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <!-- Framework assemblies — no HintPath needed for net48 -->
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
   <!-- Post-build: copy DLL to SimHub directory so it loads on next SimHub restart -->

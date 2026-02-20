@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>SmartAmbientMatter</AssemblyName>
+    <RootNamespace>SmartAmbientMatter</RootNamespace>
+    <Nullable>disable</Nullable>
+    <LangVersion>9.0</LangVersion>
+
+    <!--
+      SimHubPath is resolved differently depending on where the build runs:
+        Windows PowerShell / cmd / Visual Studio  →  C:\Program Files (x86)\SimHub
+        WSL (Linux dotnet)                        →  /mnt/c/Program Files (x86)/SimHub
+
+      Override by passing: dotnet build -p:SimHubPath=/your/path
+    -->
+    <SimHubPath Condition="'$(SimHubPath)' == '' AND !$([MSBuild]::IsOSUnixLike())">C:\Program Files (x86)\SimHub</SimHubPath>
+    <SimHubPath Condition="'$(SimHubPath)' == '' AND $([MSBuild]::IsOSUnixLike())">/mnt/c/Program Files (x86)/SimHub</SimHubPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=False: don't copy to output; SimHub provides these at runtime -->
+    <Reference Include="SimHub.Plugins">
+      <HintPath>$(SimHubPath)/SimHub.Plugins.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SimHub.Logging">
+      <HintPath>$(SimHubPath)/SimHub.Logging.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="GameReaderCommon">
+      <HintPath>$(SimHubPath)/GameReaderCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(SimHubPath)/Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MahApps.Metro">
+      <HintPath>$(SimHubPath)/MahApps.Metro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="WoteverCommon">
+      <HintPath>$(SimHubPath)/WoteverCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>$(SimHubPath)/log4net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Post-build: copy DLL to SimHub directory so it loads on next SimHub restart -->
+  <Target Name="CopyToSimHub" AfterTargets="Build" Condition="!$([MSBuild]::IsOSUnixLike())">
+    <Exec Command="XCOPY /Y /R &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SimHubPath)\&quot;" />
+  </Target>
+  <Target Name="CopyToSimHubWSL" AfterTargets="Build" Condition="$([MSBuild]::IsOSUnixLike())">
+    <Exec Command="cp -f &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SimHubPath)/&quot;" />
+  </Target>
+</Project>

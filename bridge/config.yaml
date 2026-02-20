@@ -1,0 +1,33 @@
+matter_server_url: "ws://192.168.68.5:5580/ws"
+udp_listen_ip: "127.0.0.1"
+udp_listen_port: 10001
+
+reconnect_initial_delay: 2.0   # seconds before first retry
+reconnect_max_delay: 60.0      # cap for exponential backoff
+reconnect_multiplier: 2.0
+
+dedup_mireds_threshold: 10     # skip if mireds delta < this
+dedup_brightness_threshold: 5  # skip if brightness delta < this
+
+zones:
+  ceiling:
+    node_ids: [1, 2, 3]
+    endpoint_id: 1
+    brightness_multiplier: 1.0
+    min_kelvin: 2700
+    max_kelvin: 6500
+
+  # Uncomment and configure additional zones as needed:
+  # desk_lamp:
+  #   node_ids: [4]
+  #   endpoint_id: 1
+  #   brightness_multiplier: 0.6
+  #   min_kelvin: 2700
+  #   max_kelvin: 6500
+  #
+  # led_strip:
+  #   node_ids: [5, 6]
+  #   endpoint_id: 1
+  #   brightness_multiplier: 0.8
+  #   min_kelvin: 2700
+  #   max_kelvin: 6500

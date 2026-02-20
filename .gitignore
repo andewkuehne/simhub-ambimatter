@@ -1,0 +1,29 @@
+# Build outputs
+plugin/SmartAmbientMatter/bin/
+plugin/SmartAmbientMatter/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code project files
+.claude/
+CLAUDE.md
+
+# Release zips (built by CI or manually — not source-controlled)
+release/
+*.zip

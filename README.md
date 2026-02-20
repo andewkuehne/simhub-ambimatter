@@ -1,4 +1,5 @@
 # SimHub AmbiMatter
+This is the first app i have made using claude code.
 
 Ambient room lighting that reacts to iRacing telemetry (time of day, weather,
 tunnels) via Matter-compatible CCT smart bulbs.

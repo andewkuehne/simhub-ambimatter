@@ -83,6 +83,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Monitor Index -->
@@ -163,6 +165,32 @@
                         ValueChanged="SliderBrightMax_ValueChanged" Margin="0,14,8,0"/>
                 <TextBlock Grid.Row="5" Grid.Column="2"
                            x:Name="LblBrightMax" VerticalAlignment="Center"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
+
+                <!-- Kelvin Min -->
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Kelvin Min (K)"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,8,0"
+                           ToolTip="Warmest color temperature your bulbs support (e.g. 2700)."/>
+                <Slider Grid.Row="6" Grid.Column="1"
+                        x:Name="SliderKelvinMin"
+                        Minimum="2000" Maximum="4000" SmallChange="100"
+                        TickFrequency="100" IsSnapToTickEnabled="True"
+                        ValueChanged="SliderKelvinMin_ValueChanged" Margin="0,14,8,0"/>
+                <TextBlock Grid.Row="6" Grid.Column="2"
+                           x:Name="LblKelvinMin" VerticalAlignment="Center"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
+
+                <!-- Kelvin Max -->
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="Kelvin Max (K)"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,8,0"
+                           ToolTip="Coolest color temperature your bulbs support (e.g. 6500)."/>
+                <Slider Grid.Row="7" Grid.Column="1"
+                        x:Name="SliderKelvinMax"
+                        Minimum="4000" Maximum="7000" SmallChange="100"
+                        TickFrequency="100" IsSnapToTickEnabled="True"
+                        ValueChanged="SliderKelvinMax_ValueChanged" Margin="0,14,8,0"/>
+                <TextBlock Grid.Row="7" Grid.Column="2"
+                           x:Name="LblKelvinMax" VerticalAlignment="Center"
                            Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
             </Grid>
 

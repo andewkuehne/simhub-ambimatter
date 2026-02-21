@@ -57,6 +57,8 @@ namespace SmartAmbientMatter.Settings
             SliderCaptureMs.Value  = s.CaptureIntervalMs;
             SliderBrightMin.Value  = s.BrightnessMin;
             SliderBrightMax.Value  = s.BrightnessMax;
+            SliderKelvinMin.Value  = s.KelvinMin;
+            SliderKelvinMax.Value  = s.KelvinMax;
 
             SliderIntensity.Value    = s.IntensityThreshold;
             SliderSleep.Value        = s.MinSleepMs;
@@ -98,6 +100,8 @@ namespace SmartAmbientMatter.Settings
             s.CaptureIntervalMs = (int)SliderCaptureMs.Value;
             s.BrightnessMin     = (int)SliderBrightMin.Value;
             s.BrightnessMax     = (int)SliderBrightMax.Value;
+            s.KelvinMin         = (int)SliderKelvinMin.Value;
+            s.KelvinMax         = (int)SliderKelvinMax.Value;
 
             s.IntensityThreshold = SliderIntensity.Value;
             s.MinSleepMs         = (int)SliderSleep.Value;
@@ -222,6 +226,18 @@ namespace SmartAmbientMatter.Settings
             LblBrightMax.Text = ((int)SliderBrightMax.Value).ToString();
         }
 
+        private void SliderKelvinMin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_loading || LblKelvinMin == null) return;
+            LblKelvinMin.Text = ((int)SliderKelvinMin.Value).ToString();
+        }
+
+        private void SliderKelvinMax_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_loading || LblKelvinMax == null) return;
+            LblKelvinMax.Text = ((int)SliderKelvinMax.Value).ToString();
+        }
+
         private void UpdateSliderLabels()
         {
             if (LblIntensityVal != null)
@@ -240,6 +256,10 @@ namespace SmartAmbientMatter.Settings
                 LblBrightMin.Text      = ((int)SliderBrightMin.Value).ToString();
             if (LblBrightMax != null)
                 LblBrightMax.Text      = ((int)SliderBrightMax.Value).ToString();
+            if (LblKelvinMin != null)
+                LblKelvinMin.Text      = ((int)SliderKelvinMin.Value).ToString();
+            if (LblKelvinMax != null)
+                LblKelvinMax.Text      = ((int)SliderKelvinMax.Value).ToString();
         }
 
         // ── Save button ────────────────────────────────────────────────────────

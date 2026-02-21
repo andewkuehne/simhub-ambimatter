@@ -45,6 +45,12 @@ namespace SmartAmbientMatter
         /// <summary>Maximum bulb brightness (0-254). Ceiling for full-white screens.</summary>
         public int BrightnessMax     { get; set; } = 254;
 
+        /// <summary>Minimum color temperature sent to bulbs (K). Set to your bulbs' lower limit.</summary>
+        public int KelvinMin         { get; set; } = 2700;
+
+        /// <summary>Maximum color temperature sent to bulbs (K). Set to your bulbs' upper limit.</summary>
+        public int KelvinMax         { get; set; } = 6500;
+
         // ── Rate Limiting ───────────────────────────────────────────────────────
         /// <summary>
         /// Minimum milliseconds between commands per zone (the "Matter Wall").

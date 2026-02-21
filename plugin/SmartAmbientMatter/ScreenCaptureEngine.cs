@@ -149,7 +149,7 @@ namespace SmartAmbientMatter
             // ── Kelvin from warmth ratio ───────────────────────────────────────
             // warmth: -1.0 = pure blue (cool), 0.0 = neutral, +1.0 = pure red (warm)
             double warmth = (avgR - avgB) / 255.0;
-            int    kelvin = Clamp((int)(4600 - warmth * 1900), 2700, 6500);
+            int    kelvin = Clamp((int)(4600 - warmth * 1900), _settings.KelvinMin, _settings.KelvinMax);
 
             // ── Brightness from relative luminance ────────────────────────────
             // Standard Rec.709 luminance coefficients, output 0-255

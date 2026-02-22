@@ -85,6 +85,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Monitor Index -->
@@ -191,6 +192,19 @@
                         ValueChanged="SliderKelvinMax_ValueChanged" Margin="0,14,8,0"/>
                 <TextBlock Grid.Row="7" Grid.Column="2"
                            x:Name="LblKelvinMax" VerticalAlignment="Center"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
+
+                <!-- Smoothing -->
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Smoothing"
+                           Style="{StaticResource LabelStyle}" Margin="0,12,8,0"
+                           ToolTip="EMA smoothing factor. Lower = smoother (dampens HUD flicker). Higher = more responsive."/>
+                <Slider Grid.Row="8" Grid.Column="1"
+                        x:Name="SliderSmoothing"
+                        Minimum="0.05" Maximum="0.50" SmallChange="0.05"
+                        TickFrequency="0.05" IsSnapToTickEnabled="True"
+                        ValueChanged="SliderSmoothing_ValueChanged" Margin="0,14,8,0"/>
+                <TextBlock Grid.Row="8" Grid.Column="2"
+                           x:Name="LblSmoothing" VerticalAlignment="Center"
                            Style="{StaticResource LabelStyle}" Margin="0,12,0,0"/>
             </Grid>
 

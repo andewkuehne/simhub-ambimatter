@@ -104,7 +104,8 @@ namespace SmartAmbientMatter
                     continue;
 
                 // Intensity check — first send always goes through (LastSent == null)
-                double intensity = _transitionCalc.CalculateIntensity(computed, zoneState.LastSent);
+                int kelvinRange = Settings.KelvinMax - Settings.KelvinMin;
+                double intensity = _transitionCalc.CalculateIntensity(computed, zoneState.LastSent, kelvinRange);
                 if (!guillotine && intensity < Settings.IntensityThreshold)
                     continue;
 

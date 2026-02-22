@@ -51,6 +51,13 @@ namespace SmartAmbientMatter
         /// <summary>Maximum color temperature sent to bulbs (K). Set to your bulbs' upper limit.</summary>
         public int KelvinMax         { get; set; } = 6500;
 
+        /// <summary>
+        /// EMA smoothing factor (0.05=very smooth, 0.50=barely smoothed).
+        /// Controls how quickly the output tracks screen changes.
+        /// Lower values dampen HUD flicker better but make transitions slower.
+        /// </summary>
+        public double SmoothingAlpha { get; set; } = 0.15;
+
         // ── Rate Limiting ───────────────────────────────────────────────────────
         /// <summary>
         /// Minimum milliseconds between commands per zone (the "Matter Wall").

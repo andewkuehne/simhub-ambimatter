@@ -209,6 +209,9 @@ class UdpCommandProtocol(asyncio.DatagramProtocol):
 # Matter command dispatch
 # ---------------------------------------------------------------------------
 
+_MATTER_CMD_TIMEOUT = 5.0  # seconds — prevents a hung bulb from blocking the loop
+
+
 async def _send_to_bulb(
     client,
     node_id: int,
@@ -220,36 +223,59 @@ async def _send_to_bulb(
     """
     Send color temperature + brightness commands to a single Matter node.
     The chip.clusters import is lazy so --dry-run works without the CHIP SDK.
+
+    Each command is wrapped with a 5-second timeout to prevent a hung bulb
+    from blocking the entire command loop.
+
+    Matter clusters used:
+      - 0x0300 (ColorControl) → MoveToColorTemperature
+        colorTemperatureMireds: target CCT in mireds (1,000,000 / kelvin)
+        transitionTime: fade duration in 100ms units (8 = 800ms)
+        optionsMask=1, optionsOverride=1: execute even if bulb reports "off"
+      - 0x0008 (LevelControl) → MoveToLevelWithOnOff
+        level: brightness 0-254 (Matter uses 0-254, not 0-255)
+        transitionTime: same units as color temperature
+        optionsMask=0, optionsOverride=0: default behavior
     """
     from chip.clusters import Objects as clusters  # noqa: PLC0415
 
     try:
-        await client.send_device_command(
-            node_id=node_id,
-            endpoint_id=endpoint_id,
-            command=clusters.ColorControl.Commands.MoveToColorTemperature(
-                colorTemperatureMireds=mireds,
-                transitionTime=transition,
-                optionsMask=1,      # execute even if bulb reports it is "off"
-                optionsOverride=1,
+        await asyncio.wait_for(
+            client.send_device_command(
+                node_id=node_id,
+                endpoint_id=endpoint_id,
+                command=clusters.ColorControl.Commands.MoveToColorTemperature(
+                    colorTemperatureMireds=mireds,
+                    transitionTime=transition,
+                    optionsMask=1,
+                    optionsOverride=1,
+                ),
             ),
+            timeout=_MATTER_CMD_TIMEOUT,
         )
         logger.debug("  node %d: color temperature OK (mireds=%d)", node_id, mireds)
+    except asyncio.TimeoutError:
+        logger.error("  node %d: color temperature command timed out (%.0fs)", node_id, _MATTER_CMD_TIMEOUT)
     except Exception as exc:
         logger.error("  node %d: color temperature command failed: %s", node_id, exc)
 
     try:
-        await client.send_device_command(
-            node_id=node_id,
-            endpoint_id=endpoint_id,
-            command=clusters.LevelControl.Commands.MoveToLevelWithOnOff(
-                level=brightness,
-                transitionTime=transition,
-                optionsMask=0,
-                optionsOverride=0,
+        await asyncio.wait_for(
+            client.send_device_command(
+                node_id=node_id,
+                endpoint_id=endpoint_id,
+                command=clusters.LevelControl.Commands.MoveToLevelWithOnOff(
+                    level=brightness,
+                    transitionTime=transition,
+                    optionsMask=0,
+                    optionsOverride=0,
+                ),
             ),
+            timeout=_MATTER_CMD_TIMEOUT,
         )
         logger.debug("  node %d: brightness OK (level=%d)", node_id, brightness)
+    except asyncio.TimeoutError:
+        logger.error("  node %d: brightness command timed out (%.0fs)", node_id, _MATTER_CMD_TIMEOUT)
     except Exception as exc:
         logger.error("  node %d: brightness command failed: %s", node_id, exc)
 
@@ -506,6 +532,17 @@ def main() -> None:
 
     logger.info("AmbiMatter bridge starting (dry-run=%s)", args.dry_run)
     logger.info("Config: %s", args.config)
+    logger.info("  Matter server:   %s", config.matter_server_url)
+    logger.info("  UDP listen:      %s:%d", config.udp_listen_ip, config.udp_listen_port)
+    logger.info("  Dedup thresholds: mireds=%d, brightness=%d",
+                config.dedup_mireds_threshold, config.dedup_brightness_threshold)
+    logger.info("  Reconnect:       initial=%.1fs, max=%.1fs, multiplier=%.1f",
+                config.reconnect_initial_delay, config.reconnect_max_delay,
+                config.reconnect_multiplier)
+    for name, z in config.zones.items():
+        logger.info("  Zone %-12s  nodes=%s  endpoint=%d  multiplier=%.2f  kelvin=%d-%dK",
+                     name, z.node_ids, z.endpoint_id, z.brightness_multiplier,
+                     z.min_kelvin, z.max_kelvin)
 
     try:
         asyncio.run(run_bridge(config, dry_run=args.dry_run))

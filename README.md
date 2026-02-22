@@ -1,20 +1,24 @@
 # SimHub AmbiMatter
 This is the first app i have made using claude code.
 
-Ambient room lighting that reacts to iRacing telemetry (time of day, weather,
-tunnels) via Matter-compatible CCT smart bulbs.
+Ambient room lighting that reacts to your screen content via Matter-compatible
+CCT smart bulbs. Works with any game — the plugin captures your monitor and
+derives color temperature and brightness from the on-screen image.
 
 ## How It Works
 
 ```
-SimHub (iRacing) → C# Plugin → UDP → Python Bridge → Matter → Smart Bulbs
+Screen Capture → C# Plugin → UDP → Python Bridge → Matter → Smart Bulbs
 ```
 
-1. The **C# SimHub plugin** reads iRacing telemetry, calculates a target color
-   temperature (Kelvin) and brightness, and sends UDP packets to the bridge.
+1. The **C# SimHub plugin** captures the game screen, computes a target color
+   temperature (Kelvin) and brightness using McCamy's CCT formula on the
+   average pixel color, and sends UDP packets to the bridge.
 2. The **Python Matter bridge** receives those packets and sends Matter protocol
    commands to your bulbs, organized into named zones.
 
+The plugin uses proper color science (sRGB → XYZ → chromaticity → CCT) with
+gamma correction and EMA smoothing to produce stable, accurate ambient lighting.
 The system uses CCT (Kelvin + Brightness) only — no RGB. Bulbs smoothly
 transition between states using Matter's built-in transition time, keeping
 command frequency low enough to avoid crashing Wi-Fi Matter devices.
@@ -23,9 +27,9 @@ command frequency low enough to avoid crashing Wi-Fi Matter devices.
 
 | Component | Status |
 |---|---|
-| Python Matter Bridge | Phase 1 — complete |
-| C# SimHub Plugin | Phase 2 — complete |
-| Weather layer (iRacing cloud/rain) | Phase 3 — planned |
+| Python Matter Bridge | complete |
+| C# SimHub Plugin (screen capture) | complete |
+| Guillotine tunnel detection | complete |
 
 ## Quick Start
 

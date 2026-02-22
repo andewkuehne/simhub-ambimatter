@@ -14,10 +14,6 @@ namespace SmartAmbientMatter
     /// </summary>
     public class TransitionCalculator
     {
-        private const int K_MIN = 2700;
-        private const int K_MAX = 6500;
-        private const int K_RANGE = K_MAX - K_MIN;  // 3800
-
         // ── Transition Constants (Matter units: 1 = 100ms) ─────────────────────
         public const int TRANSITION_INSTANT = 0;   // 0ms — tunnel, massive shift
         public const int TRANSITION_QUICK   = 4;   // 400ms — cloud cover entering
@@ -28,12 +24,16 @@ namespace SmartAmbientMatter
         /// Uses Max(deltaBrightness, deltaKelvin) to avoid masking large single-axis changes.
         /// Returns 1.0 (maximum) if lastSent is null (first send — always update).
         /// </summary>
-        public double CalculateIntensity(LightingState current, LightingState lastSent)
+        /// <param name="current">Current computed lighting state.</param>
+        /// <param name="lastSent">Last state sent to the bridge (null if never sent).</param>
+        /// <param name="kelvinRange">KelvinMax - KelvinMin from settings, used for normalization.</param>
+        public double CalculateIntensity(LightingState current, LightingState lastSent, int kelvinRange)
         {
             if (lastSent == null) return 1.0;
+            if (kelvinRange <= 0) kelvinRange = 3800; // fallback to avoid division by zero
 
             double deltaBright = Math.Abs(current.Brightness - lastSent.Brightness) / 255.0;
-            double deltaKelvin = Math.Abs(current.Kelvin - lastSent.Kelvin) / (double)K_RANGE;
+            double deltaKelvin = Math.Abs(current.Kelvin - lastSent.Kelvin) / (double)kelvinRange;
 
             return Math.Max(deltaBright, deltaKelvin);
         }

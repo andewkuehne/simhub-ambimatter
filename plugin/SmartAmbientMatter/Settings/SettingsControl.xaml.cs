@@ -59,6 +59,7 @@ namespace SmartAmbientMatter.Settings
             SliderBrightMax.Value  = s.BrightnessMax;
             SliderKelvinMin.Value  = s.KelvinMin;
             SliderKelvinMax.Value  = s.KelvinMax;
+            SliderSmoothing.Value  = s.SmoothingAlpha;
 
             SliderIntensity.Value    = s.IntensityThreshold;
             SliderSleep.Value        = s.MinSleepMs;
@@ -102,6 +103,7 @@ namespace SmartAmbientMatter.Settings
             s.BrightnessMax     = (int)SliderBrightMax.Value;
             s.KelvinMin         = (int)SliderKelvinMin.Value;
             s.KelvinMax         = (int)SliderKelvinMax.Value;
+            s.SmoothingAlpha    = Math.Round(SliderSmoothing.Value, 2);
 
             s.IntensityThreshold = SliderIntensity.Value;
             s.MinSleepMs         = (int)SliderSleep.Value;
@@ -238,6 +240,12 @@ namespace SmartAmbientMatter.Settings
             LblKelvinMax.Text = ((int)SliderKelvinMax.Value).ToString();
         }
 
+        private void SliderSmoothing_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_loading || LblSmoothing == null) return;
+            LblSmoothing.Text = SliderSmoothing.Value.ToString("F2");
+        }
+
         private void UpdateSliderLabels()
         {
             if (LblIntensityVal != null)
@@ -260,6 +268,8 @@ namespace SmartAmbientMatter.Settings
                 LblKelvinMin.Text      = ((int)SliderKelvinMin.Value).ToString();
             if (LblKelvinMax != null)
                 LblKelvinMax.Text      = ((int)SliderKelvinMax.Value).ToString();
+            if (LblSmoothing != null)
+                LblSmoothing.Text      = SliderSmoothing.Value.ToString("F2");
         }
 
         // ── Save button ────────────────────────────────────────────────────────
@@ -267,9 +277,54 @@ namespace SmartAmbientMatter.Settings
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             SaveToModel();
+
+            var errors = ValidateSettings();
+            if (errors.Count > 0)
+            {
+                MessageBox.Show(
+                    "Cannot save — please fix the following:\n\n" + string.Join("\n", errors),
+                    "AmbiMatter — Validation Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             _plugin.SaveSettings();
             MessageBox.Show("AmbiMatter settings saved.", "AmbiMatter",
                 MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private List<string> ValidateSettings()
+        {
+            var s = _plugin.Settings;
+            var errors = new List<string>();
+
+            if (s.BrightnessMin >= s.BrightnessMax)
+                errors.Add("Brightness Floor must be less than Brightness Ceiling.");
+
+            if (s.KelvinMin >= s.KelvinMax)
+                errors.Add("Kelvin Min must be less than Kelvin Max.");
+
+            if (s.SampleStep < 1)
+                errors.Add("Sample Step must be at least 1.");
+
+            var zoneNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var zone in s.Zones)
+            {
+                if (string.IsNullOrWhiteSpace(zone.Name))
+                {
+                    errors.Add("All zones must have a non-empty name.");
+                    break;
+                }
+                if (!zoneNames.Add(zone.Name))
+                {
+                    errors.Add($"Duplicate zone name: '{zone.Name}'.");
+                    break;
+                }
+                if (zone.BrightnessMultiplier <= 0 || zone.BrightnessMultiplier > 2.0)
+                    errors.Add($"Zone '{zone.Name}': Brightness Multiplier must be > 0 and <= 2.0.");
+            }
+
+            return errors;
         }
 
         // ── Live status timer ──────────────────────────────────────────────────
